@@ -1,4 +1,4 @@
-# BODBuilder - Basic Operational De-Bruijn graph Builder
+# BODBuilder - Basic-Operational De-Bruijn graph Builder
 
 ## Motivation and quick explanation
 This small tool has been created as a part of NGS data analysis homework in Bioinformatics Institute :)
