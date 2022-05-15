@@ -10,7 +10,7 @@ BODBuilder provides pipeline for constructing De-Bruijn according to its mathema
 1. Takes a single or multiple files with supported data formats (no need to explicitly specify format).
 2. Builds primary oriented multigraph **G** - creates connections in a graph using nodes with size `k` and primary edges with sizes `k+1` between them. Each kmer is processed simultaneously with own reverse-complement one.
 3. Simplifies graph until convergence - contract edges and creates minor graph **G\`** of a graph **G**. Its property - no passing vertices <img src="https://render.githubusercontent.com/render/math?math=(deg(v)_{out} = deg(v)_{in} = 1)">.
-4. Removes tips from graph.
+4. Removes tips from graph (low-covered edges - user-specified threshold).
 5. Tries to remove bulges from graph by removing every badly covered edge.
 6. Stores graph in `.dot` format.
 7. If option `--draw` is provided, draws graph in `.png` format.
@@ -35,6 +35,7 @@ Keep `--draw` to obtain picture in `.png` format (_I assume you added tool direc
 py <path_to_repository>/build_graph.py -i <input_sequence_file> [<another_sequence_file>] \
 -o <output_directory> \
 -k <kmer sise - odd> \
+-b <lower bound of coverage for edges removing> \
 --draw 
 ```
 
