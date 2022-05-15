@@ -5,21 +5,9 @@ import logging
 import shutil
 
 package_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(0, os.path.join(package_dir, 'graph_dir'))
+sys.path.insert(0, os.path.join(package_dir, 'graph_dir'))  # Добавить директорию в любой PATH
 
 import graph_structure as gs
-
-
-class TqdmHandler(logging.Handler):
-    def emit(self, record):
-        try:
-            msg = self.format(record)
-            tqdm.write(msg)  # , file=sys.stderr)
-            self.flush()
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except:
-            self.handleError(record)
 
 
 def main():
