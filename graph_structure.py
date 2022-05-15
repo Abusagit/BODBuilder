@@ -395,30 +395,28 @@ class DBGraph:
 
         while True:
             BAD_EDGES_FOUND = 0
-            edges_items = set(self.edges.items()) - visited_edges
+            edges_items = set(self.edges.items())  #- visited_edges
 
             while edges_items:
                 edge_sequence, edge = edges_items.pop()
-                revcomp_seq = self.rev_com_dict.get(edge_sequence, None)
-                revcomp_edge = self.edges.get(revcomp_seq, None)
+                if (edge_sequence, edge) not in visited_edges:
+                    revcomp_seq = self.rev_com_dict.get(edge_sequence, None)
+                    revcomp_edge = self.edges.get(revcomp_seq, None)
 
-                edges_items.discard((revcomp_seq, revcomp_edge))
+                    edges_items.discard((revcomp_seq, revcomp_edge))
 
-                visited_edges |= {(edge_sequence, edge), (revcomp_seq, revcomp_edge)}
+                    visited_edges |= {(edge_sequence, edge), (revcomp_seq, revcomp_edge)}
 
-                if edge_sequence in self.edges and condition(edge):
-                    BAD_EDGES_FOUND += 1
-                    self.remove_edge(edge)
-                    if not edge.is_self_complement and revcomp_edge:
-                        self.remove_edge(revcomp_edge)
+                    if edge_sequence in self.edges and condition(edge):
+                        BAD_EDGES_FOUND += 1
+                        self.remove_edge(edge)
+                        if not edge.is_self_complement and revcomp_edge:
+                            self.remove_edge(revcomp_edge)
 
             if not BAD_EDGES_FOUND:
                 break
 
-    def remove_bulges(self):
-
-        self.iterative_edges_removing(condition=self.bad_edge_coverage)
-
+    def remove_duplicated_paths(self):
         nodes_directed_connections = defaultdict(list)
         for edge in tqdm(self.edges.values()):
             nodes_directed_connections[(edge.src, edge.dest)].append(edge)
@@ -427,13 +425,24 @@ class DBGraph:
             for edge in sorted(bunch_of_connections_between_node_i_node_j, key=lambda x: x.coverage)[:-1]:
                 self.remove_edge(edge)
 
+    def remove_bulges(self):
+
+        self.iterative_edges_removing(condition=self.bad_edge_coverage)
+
+        self.remove_duplicated_paths()
+
         self.remove_tips(condition=lambda x: True, k_multiplier_for_length=4)
 
         mean_length = np.mean([len(e) for e in self.edges])
         logger.info(f"Mean length {mean_length}")
+
+
         self.iterative_edges_removing(condition=lambda edge: all((len(edge.sequence) < 3 * self.k,
                                                                   len(edge.sequence) < mean_length / 100,
-                                                                  edge.src not in set(edge.dest.path_to.values()))))
+                                                                  edge.src not in set(edge.dest.path_to.values()),
+                                                                 edge.src.deg_in == 0)))
+
+        self.remove_duplicated_paths()
 
     def write_edges(self):
         saving_file = os.path.join(self.outdir, "edges.fasta")
