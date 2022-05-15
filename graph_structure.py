@@ -3,7 +3,6 @@ from tqdm import tqdm
 import logging
 import numpy as np
 import networkx as nx
-import pygraphviz as pgv
 from networkx.drawing.nx_agraph import graphviz_layout, to_agraph
 
 import os
@@ -85,7 +84,7 @@ class DBGraph:
 
     STARS = '*' * 100
 
-    def __init__(self, path_to_fasta, k, outdir: str, ratio, data_format):
+    def __init__(self, paths, k, outdir: str, ratio):
 
         self.k = k
         self.nodes = {}
@@ -98,8 +97,8 @@ class DBGraph:
         self.ratio = ratio
 
         logger.info(f"{DBGraph.STARS}\n")
-        logger.info(f"Initializing graph building: reading file {path_to_fasta}")
-        self._initialize(path_to_fasta, data_format)
+        logger.info("Initializing graph building")
+        self._initialize(paths)
         logger.info(f"Done!\n{DBGraph.STARS}\n\n{DBGraph.STARS}")
 
         self.coverages = None
@@ -224,15 +223,19 @@ class DBGraph:
                 if i % 4 == 2:
                     self._process_kmers_from_sequence(line.strip())
 
-    def _initialize(self, path_to_fasta, data_format):
+    def _initialize(self, paths):
 
-        init_option = {"fasta": self._fasta_option, "fastq": self._fastq_option}
-
-        try:
-            init_option[data_format](path_to_fasta)
-
-        except KeyError:
-            raise FormatError("Provided format isn't supported or incorrect. Check starting command!")
+        init_option = {"fasta": self._fasta_option,
+                       "fna": self._fasta_option,
+                       "fa": self._fasta_option,
+                       "fastq": self._fastq_option}
+        for path in paths:
+            data_format = path.split(".")[-1]
+            try:
+                init_option[data_format](path)
+                logger.info(f"Finished extracting kmers from {path}")
+            except KeyError:
+                raise FormatError(f"Provided format {data_format} isn't supported or incorrect. Check starting command!")
 
     def _init_get_rev_comp(self, kp1_mer: str):
         kp1_revcomp = self.get_rev_comp(kp1_mer)

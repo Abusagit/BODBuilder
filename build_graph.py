@@ -24,21 +24,24 @@ class TqdmHandler(logging.Handler):
 
 def main():
     parser = argparse.ArgumentParser(description="De-Bruijn graph builder, symplyfier and drawer")
-    parser.add_argument("-i", "--input", type=str, help="Path to your file with data for graph")
+    parser.add_argument("-i", "--input", nargs="+", type=str, help="Path to your file with data for graph")
     parser.add_argument("-k", "--kmer-size", type=int, help="Size of a kmer to be used for graph building")
-    parser.add_argument("--format", type=str, default="fasta", help="format of your input data")
-    parser.add_argument("-b", "--bad_cov_ratio", type=float, default=100, help="Threshold for clipping edges defined \
+    parser.add_argument("-b", "--bad_cov", type=float, default=100, help="Threshold for clipping edges defined \
                                                                                     as Edge_cov / mean(Edge_cov)")
     parser.add_argument("--draw", action="store_true", help="Stay this option to get drawn final graph")
-    parser.add_argument("--force", action="store_true", help="Force override dir")
+    parser.add_argument("--force", action="store_true", help="Force override dir]")
     parser.add_argument("-o", "--outdir")
 
     args = parser.parse_args()
 
+    force_message = ""
     if os.path.isdir(args.outdir) and not args.force:
-        raise FileExistsError(f"Directory {args.outdir} already exists! Specify another one")
+        raise FileExistsError(f"Directory {args.outdir} already exists! Specify another one or use '--force' to override")
     elif os.path.isdir(args.outdir) and args.force:
         shutil.rmtree(args.outdir, ignore_errors=True)
+
+        force_message = f"Force overriding directory {args.outdir}"
+
     os.mkdir(args.outdir)
 
     root = logging.getLogger()
@@ -59,13 +62,15 @@ def main():
     root.addHandler(console_handler)
     root.addHandler(file_handler)
     # root.addHandler(tqdm_handler)
+    if force_message:
+        root.warning(force_message)
 
-    root.info(f"Started building graph on {args.input}...")
+    input_files = '\n'.join(args.input)
+    root.info(f"Started building graph on: \n{input_files}")
     root.debug(f"Parsed arguments are: {args}")
     root.info(f"Results will be saved in {args.outdir}/")
 
-    graph = gs.DBGraph(args.input, args.kmer_size, outdir=args.outdir, data_format=args.format,
-                       ratio=args.bad_cov_ratio)
+    graph = gs.DBGraph(args.input, args.kmer_size, outdir=args.outdir, ratio=args.bad_cov)
 
     graph.complete_graph_building()
 
