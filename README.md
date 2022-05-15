@@ -21,7 +21,7 @@ Final graph is guaranteed to have only highly-covered edges related to mean edge
 ## Usage
 1. Clone repository: 
 ```{bash}
-git clone https://github.com/Abusagit/DeBruijnGraph.git
+git clone https://github.com/Abusagit/BODBuilder.git
 ```
 2. Install requirements (_if needed_):
 ```{bash}
