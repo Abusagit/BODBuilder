@@ -28,7 +28,7 @@ class Node:
         return hash(self.sequence)
 
     def __repr__(self):
-        return f"|NODE_{self.sequence} | deg_in {self.deg_in} | deg_out {self.deg_out}|"
+        return f"|NODE {self.sequence} | deg_in {self.deg_in} | deg_out {self.deg_out}|"
 
     @property
     def deg_in(self):
@@ -72,7 +72,7 @@ class Edge:
         return len(self.sequence) - self.kp1 + 1
 
     def __repr__(self):
-        return f"EDGE_{self.sequence}_coverage_{self.coverage}"
+        return f"EDGE {self.sequence}_coverage_{self.coverage}"
 
 
 class DBGraph:
@@ -120,14 +120,15 @@ class DBGraph:
         self.coverage_std = np.std(self.coverages)
 
         logger.debug(
-            f"Mean coverage is {self.coverage_mean}, std {self.coverage_std}, median is {np.median(self.coverages)}")
+            f"Mean coverage is {self.coverage_mean}, std {self.coverage_std}, median is {np.median(self.coverages)}"
+        )
 
         # self.draw_and_save_graph()
         # breakpoint()
 
-        logger.info("Performing tips removing precodure...")
-        self.remove_tips(condition=self.bad_edge_condition)
-
+        logger.info("Performing tips removing procedure...")
+        self.remove_tips(condition=self.bad_edge_coverage)
+        #
         # self.draw_and_save_graph()
         # breakpoint()
 
@@ -145,8 +146,8 @@ class DBGraph:
         self.draw_and_save_graph()
         self.write_edges()
 
-    def bad_edge_condition(self, edge: Edge):
-        return self.coverage_mean / edge.coverage >= self.ratio
+    def bad_edge_coverage(self, edge: Edge):
+        return edge.coverage <= self.ratio
 
     def _process_kmers_from_sequence(self, line):
         n = len(line)
@@ -341,10 +342,10 @@ class DBGraph:
         try:
             if condition(edge) and len(edge.sequence) < k_multiplier_for_length * self.k:
 
-                if edge.dest.deg_out == 0 and edge.dest.deg_in == 1:
+                if all((edge.dest.deg_out == 0, edge.dest.deg_in == 1, edge.src.deg_out > 1)):
                     return 1  # Option 1
 
-                elif edge.src.deg_out == 1 and edge.src.deg_in == 0:
+                elif all((edge.src.deg_out == 1, edge.src.deg_in == 0, edge.dest.deg_out > 1)):
                     return 2  # Option 2
 
             else:
@@ -413,7 +414,7 @@ class DBGraph:
 
     def remove_bulges(self):
 
-        self.iterative_edges_removing(condition=self.bad_edge_condition)
+        self.iterative_edges_removing(condition=self.bad_edge_coverage)
 
         nodes_directed_connections = defaultdict(list)
         for edge in tqdm(self.edges.values()):
@@ -424,7 +425,12 @@ class DBGraph:
                 self.remove_edge(edge)
 
         self.remove_tips(condition=lambda x: True, k_multiplier_for_length=4)
-        self.iterative_edges_removing(condition=lambda edge: len(edge.sequence) < 4 * self.k and edge.src not in set(edge.dest.path_to.values()))
+
+        mean_length = np.mean([len(e) for e in self.edges])
+        logger.info(f"Mean length {mean_length}")
+        self.iterative_edges_removing(condition=lambda edge: all((len(edge.sequence) < 3 * self.k,
+                                                                  len(edge.sequence) < mean_length / 100,
+                                                                  edge.src not in set(edge.dest.path_to.values()))))
 
     def write_edges(self):
         saving_file = os.path.join(self.outdir, "edges.fasta")
