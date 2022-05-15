@@ -446,8 +446,8 @@ class DBGraph:
                 i += 1
 
     def draw_and_save_graph(self):
-        dot_file = os.path.join(self.outdir, "graph.dot")
-        drawing_file = os.path.join(self.outdir, "graph_planar_view.png")
+        dot_file = os.path.join(self.outdir, f"graph_k_{self.k}.dot")
+        drawing_file = os.path.join(self.outdir, f"graph_planar_view_k_{self.k}.png")
 
         logger.info(f"Saving graph structure to {dot_file}")
 
