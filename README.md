@@ -40,7 +40,7 @@ py <path_to_repository>/build_graph.py -i <input_sequence_file> [<another_sequen
 ```
 
 **Example of graph with `k=55`**
-![graph_planar_view](https://user-images.githubusercontent.com/67659154/168474315-2ef94ed4-b32b-4b62-beff-df6ea17fecd8.png)
+![graph_planar_view_k_55](https://user-images.githubusercontent.com/67659154/168481757-0d69cd66-41b2-442c-8d69-7817b79a623f.png)
 
 
 
