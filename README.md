@@ -9,14 +9,14 @@ BODBuilder provides pipeline for constructing De-Bruijn according to its mathema
 ## Typical BODBuilder workflow:
 1. Takes a single or multiple files with supported data formats (no need to explicitly specify format).
 2. Builds primary oriented multigraph **G** - creates connections in a graph using nodes with size `k` and primary edges with sizes `k+1` between them. Each kmer is processed simultaneously with own reverse-complement one.
-3. Simplifies graph until convergence - contract edges and creates minor graph **G\`** of a graph **G**. Its property - no passing vertices <img src="https://render.githubusercontent.com/render/math?math=(deg(v)_{out} = deg(v)_{in} = 1)">.
+3. Simplifies graph until convergence - contracts edges and creates minor graph **G\`** of a graph **G**. Its property - no passing vertices <img src="https://render.githubusercontent.com/render/math?math=(deg(v)_{out} = deg(v)_{in} = 1)">.
 4. Removes tips from graph (low-covered edges - user-specified threshold).
 5. Tries to remove bulges from graph by removing every badly covered edge.
 6. Stores graph in `.dot` format.
 7. If option `--draw` is provided, draws graph in `.png` format.
 
 
-Final graph is guaranteed to have only highly-covered edges related to mean edge coverage investigated after condensing, removing tips and low-covered edges and don`t have passing vertices.
+Final graph is guaranteed to have only high-covered edges related to mean edge coverage investigated after condensing and removing tips and low-covered edges. Moreover, final graph doesn\'t have passing vertices.
 
 ## Usage
 1. Clone repository: 
