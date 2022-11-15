@@ -52,5 +52,5 @@ py <path_to_repository>/build_graph.py -i <input_sequence_file> [<another_sequen
 |`-o, --outdir [./]` | Output directory |
 |`-k , --kmer-size` | Size of a kmer to be used for graph building | 
 |`-b , --bad_cov [100]` | Threshold coverage for clipping edge |
-|`--draw` | Stay this option to get drawn final graph | 
+|`--draw` | Stay with this option to get picture of a final graph | 
 |`--force` | Force override dir if it is\`nt empty | 
